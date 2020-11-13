@@ -89,6 +89,14 @@ public:
         return v;
     }
 
+    static inline vec3_t random() {
+        return vec3_t(rand_uniform(), rand_uniform(), rand_uniform());
+    }
+
+    static inline vec3_t random(double min, double max) {
+        return vec3_t(rand_double(min,max), rand_double(min,max), rand_double(min,max));
+    }
+
 };
 
 inline vec3_t operator+(const vec3_t &u,const vec3_t &v)
@@ -135,14 +143,16 @@ inline vec3_t cross(const vec3_t &u,const vec3_t &v)
         u.x*v.y-u.y*v.x);
 }
 
+
+
 using colour_t=vec3_t;
 using point3_t=vec3_t;
 
 inline void write_clour(const colour_t &pixel_colour)
 {
-    int r=static_cast<int>(pixel_colour.x*255.999);
-    int g=static_cast<int>(pixel_colour.y*255.999);
-    int b=static_cast<int>(pixel_colour.z*255.999);
+    int r=static_cast<int>(sqrt(pixel_colour.x)*255.999);
+    int g=static_cast<int>(sqrt(pixel_colour.y)*255.999);
+    int b=static_cast<int>(sqrt(pixel_colour.z)*255.999);
     std::printf("%d %d %d\n",r,g,b);
 }
 

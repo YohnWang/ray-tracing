@@ -7,6 +7,17 @@
 
 using namespace std;
 
+inline vec3_t random_in_unit_sphere()
+{
+    while (true)
+    {
+        auto p = vec3_t::random(-1, 1);
+        if (p.len_squared() >= 1)
+            continue;
+        return p;
+    }
+}
+
 class sphere_t:public hittable_t
 {
 public:
@@ -67,12 +78,15 @@ std::pair<bool, hit_record_t> hittable_list_t::hit(const ray_t &r, double t_min,
     return {hit_anything,temp_rec};
 }
 
-colour_t ray_colour(const ray_t &r,const hittable_list_t &world)
+colour_t ray_colour(const ray_t &r,const hittable_list_t &world,int deep)
 {
-    auto [is_hit,rec]=world.hit(r, 0, infinity);
+    if(deep<=0)
+        return {0,0,0};
+    auto [is_hit,rec]=world.hit(r, 0.001, infinity);
     if (is_hit) 
     {
-        return 0.5 * (rec.normal.unit() + colour_t(1,1,1));
+        point3_t target = rec.p + rec.normal + random_in_unit_sphere().unit();
+        return 0.5  * ray_colour(ray_t(rec.p, target - rec.p), world,deep-1);
     }
     auto t=(r.dir.unit().y+1.0)*0.5;
     return (1-t)*colour_t(1,1,1)+t*colour_t(0.5, 0.7, 1.0);
@@ -99,16 +113,16 @@ int main(int argc, const char *argv[])
         for(int j=0;j<image_width;j++)
         {
             colour_t pixel_colour(0, 0, 0);
-            for(int k=0;k<100;k++)
+            for(int k=0;k<10;k++)
             {
                 auto v = (i+rand_uniform()) / image_height;
                 auto u = (j+rand_uniform()) / image_width;
                 // auto v = (i+0.0) / image_height;
                 // auto u = (j+0.0) / image_width;
                 auto r=camera.get_ray(u,v);
-                pixel_colour += ray_colour(r, world);
+                pixel_colour += ray_colour(r, world,50);
             }
-            pixel_colour*=0.01;
+            pixel_colour*=1.0/10;
             write_clour(pixel_colour);
         }
     }
