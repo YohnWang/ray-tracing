@@ -32,10 +32,10 @@ inline double degrees_to_radians(double degrees)
     return degrees * pi / 180.0;
 }
 
-// inline double dtor(double degrees)
-// {
-//     return degrees_to_radians(degrees);
-// }
+inline double dtor(double degrees)
+{
+    return degrees_to_radians(degrees);
+}
 
 class vec3_t 
 {
@@ -87,6 +87,12 @@ public:
         vec3_t v=*this;
         v/=len();
         return v;
+    }
+
+    bool near_zero()const
+    {
+        constexpr double e=1e-8;
+        return fabs(x)<e && fabs(y)<e && fabs(z)<e;
     }
 
     static inline vec3_t random() {
@@ -143,16 +149,49 @@ inline vec3_t cross(const vec3_t &u,const vec3_t &v)
         u.x*v.y-u.y*v.x);
 }
 
+inline vec3_t random_in_unit_sphere()
+{
+    while (true)
+    {
+        auto p = vec3_t::random(-1, 1);
+        if (p.len_squared() >= 1)
+            continue;
+        return p;
+    }
+}
 
+vec3_t random_in_unit_disk()
+{
+    while (true)
+    {
+        auto p = vec3_t(rand_double(-1, 1), rand_double(-1, 1), 0);
+        if (p.len_squared() >= 1)
+            continue;
+        return p;
+    }
+}
+
+inline vec3_t reflect(const vec3_t &v, const vec3_t &n)
+{
+    return v - 2 * dot(v, n.unit()) * n.unit();
+}
+
+inline vec3_t refract(const vec3_t &uv, const vec3_t &n, double etai_over_etat)
+{
+    auto cos_theta = fmin(dot(-uv, n), 1.0);
+    vec3_t r_out_perp = etai_over_etat * (uv + cos_theta * n);
+    vec3_t r_out_parallel = -sqrt(fabs(1.0 - r_out_perp.len_squared())) * n;
+    return r_out_perp + r_out_parallel;
+}
 
 using colour_t=vec3_t;
 using point3_t=vec3_t;
 
 inline void write_clour(const colour_t &pixel_colour)
 {
-    int r=static_cast<int>(sqrt(pixel_colour.x)*255.999);
-    int g=static_cast<int>(sqrt(pixel_colour.y)*255.999);
-    int b=static_cast<int>(sqrt(pixel_colour.z)*255.999);
+    int r=static_cast<int>(clamp(sqrt(pixel_colour.x),0,0.999)*256);
+    int g=static_cast<int>(clamp(sqrt(pixel_colour.y),0,0.999)*256);
+    int b=static_cast<int>(clamp(sqrt(pixel_colour.z),0,0.999)*256);
     std::printf("%d %d %d\n",r,g,b);
 }
 
