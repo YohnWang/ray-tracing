@@ -33,7 +33,11 @@ class hittable_list_t:public hittable_t
 public:
     std::vector<std::shared_ptr<hittable_t>> objects;
     hittable_list_t() {}
-    hittable_list_t(std::shared_ptr<hittable_t> object) { objects.push_back(object);}
+    hittable_list_t(std::initializer_list<std::shared_ptr<hittable_t>> list)
+    {
+        for(auto &object:list)
+            objects.push_back(object);
+    }
 
     void clear() { objects.clear(); }
     void add(std::shared_ptr<hittable_t> object) { objects.push_back(object); }

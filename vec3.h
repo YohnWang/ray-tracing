@@ -193,6 +193,7 @@ inline void write_clour(const colour_t &pixel_colour)
     int g=static_cast<int>(clamp(sqrt(pixel_colour.y),0,0.999)*256);
     int b=static_cast<int>(clamp(sqrt(pixel_colour.z),0,0.999)*256);
     std::printf("%d %d %d\n",r,g,b);
+    //std::printf("%c%c%c",b,g,r);
 }
 
 #endif

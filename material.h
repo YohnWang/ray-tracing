@@ -22,7 +22,7 @@ public:
 
     virtual std::tuple<bool,colour_t,ray_t> scatter(const ray_t &r_in,const hit_record_t &rec) const override
     {
-        auto scatter_direction = rec.p + rec.normal + random_in_unit_sphere().unit();
+        auto scatter_direction = rec.normal.unit() + random_in_unit_sphere().unit();
         if(scatter_direction.near_zero())
             return {true,albedo,{rec.p, rec.normal}};
         return {true,albedo,{rec.p, scatter_direction}};

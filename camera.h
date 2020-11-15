@@ -12,9 +12,9 @@ class camera_t
     vec3_t u,v,w;
     double lens_radius;
 public:
-    camera_t(point3_t look_from={0,0,0},point3_t look_at={0,0,-1},vec3_t vup={0,1,0},
-            double vfov=120,double aspect_ratio=16.0/9.0,
-            double aperture=0.00,double focus_dist=1)
+    camera_t(point3_t look_from,point3_t look_at,vec3_t vup,
+            double vfov,double aspect_ratio=16.0/9.0,
+            double aperture=0,double focus_dist=0)
     {
         //vfov is 'vertical field-of-view in degrees'
         auto theta = degrees_to_radians(vfov);
@@ -22,6 +22,8 @@ public:
         auto viewport_height = 2.0*h;
         auto viewport_width = aspect_ratio * viewport_height;
         //auto focal_length = 1.0;
+        if(focus_dist==0)
+            focus_dist=(look_from-look_at).len();
 
         w=(look_from-look_at).unit();
         u=cross(vup,w).unit();
