@@ -50,16 +50,20 @@ class dielectric_t : public material_t
 
 public:
     double ir; // Index of Refraction
+    colour_t attenuation;
+    bool is_fresnel_reflectance;
 
-    dielectric_t(double index_of_refraction) : ir(index_of_refraction) {}
+    dielectric_t():dielectric_t(1,{1,1,1}){}
+    dielectric_t(double index_of_refraction,colour_t attenuation,bool fresnel_ref=false) : ir(index_of_refraction),attenuation(attenuation),is_fresnel_reflectance(fresnel_ref) {}
+    dielectric_t(colour_t attenuation):dielectric_t(1,attenuation){}
+    dielectric_t(double index_of_refraction):dielectric_t(index_of_refraction,{1,1,1}){}
+
 
     virtual std::tuple<bool,colour_t,ray_t> scatter(const ray_t &r_in,const hit_record_t &rec) const override
     {
-        
         double refraction_ratio = rec.front_face ? (1.0 / ir) : ir;
 
         vec3_t unit_direction = r_in.direction().unit();
-        //vec3_t refracted = refract(unit_direction, rec.normal, refraction_ratio);
 
         double cos_theta = fmin(dot(-unit_direction, rec.normal), 1.0);
         double sin_theta = sqrt(1.0 - cos_theta * cos_theta);
@@ -67,12 +71,20 @@ public:
         bool cannot_refract = refraction_ratio * sin_theta > 1.0;
         vec3_t direction;
 
-        if (cannot_refract)
+        if (cannot_refract || (is_fresnel_reflectance && reflectance(cos_theta, refraction_ratio) > rand_uniform()) )
             direction = reflect(unit_direction, rec.normal);
         else
             direction = refract(unit_direction, rec.normal, refraction_ratio);
 
-        return {true,{1,1,1},ray_t(rec.p,direction)};
+        return {true,attenuation,ray_t(rec.p,direction)};
+    }
+private:
+    static double reflectance(double cosine, double ref_idx)
+    {
+        // Use Schlick's approximation for reflectance.
+        auto r0 = (1 - ref_idx) / (1 + ref_idx);
+        r0 = r0 * r0;
+        return r0 + (1 - r0) * pow((1 - cosine), 5);
     }
 };
 

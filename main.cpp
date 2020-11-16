@@ -71,18 +71,16 @@ std::pair<bool, hit_record_t> hittable_list_t::hit(const ray_t &r, double t_min,
     return {hit_anything,temp_rec};
 }
 
-colour_t ray_colour(const ray_t &r,const hittable_list_t &world,int deep=50)
+colour_t ray_colour(const ray_t &r,const hittable_list_t &world,int depth=50)
 {
-    if(deep<=0)
+    if(depth<=0)
         return {0,0,0};
     auto [is_hit,rec]=world.hit(r, 0.001, infinity);
     if (is_hit) 
     {
-        //point3_t target = rec.p + rec.normal + random_in_unit_sphere().unit();
-        //return colour_t(1.1,1.01,0.95)  * ray_colour(ray_t(rec.p, target - rec.p), world,deep-1);
         auto [is_reflect,attenuation,scattered]=rec.mat_ptr->scatter(r,rec);
         if(is_reflect)
-            return attenuation*ray_colour(scattered,world,deep-1);
+            return attenuation*ray_colour(scattered,world,depth-1);
         else 
             return {0,0,0};
     }
@@ -141,7 +139,32 @@ hittable_list_t rand_world()
     auto material3 = make_shared<metal_t>(colour_t(1, 1, 1), 0.0);
     world.add(make_shared<sphere_t>(point3_t(4, 1, 0), 1.0, material3));
 
+    auto material4 = make_shared<dielectric_t>(2);
+    world.add(make_shared<sphere_t>(point3_t(0, 1, 2.5), 1.0, material4));
+
+
     return world;
+}
+
+
+void image_render(int image_height,int image_width,int image_height_begin,int image_height_end,camera_t camera,hittable_list_t world,vector<colour_t> &out)
+{
+    for(int i=image_height_begin-1;i>=image_height_end;i--)
+    {   
+        for(int j=0;j<image_width;j++)
+        {
+            colour_t pixel_colour(0, 0, 0);
+            for(int k=0;k<50;k++)
+            {
+                auto v = (i+rand_double(-1,1)) / image_height;
+                auto u = (j+rand_double(-1,1)) / image_width;
+                auto r=camera.get_ray(u,v);
+                pixel_colour += ray_colour(r, world);
+            }
+            pixel_colour*=1.0/50;
+            out.push_back(pixel_colour);
+        }
+    }
 }
 
 int main(int argc, const char *argv[])
@@ -151,7 +174,7 @@ int main(int argc, const char *argv[])
     const int image_width = 1024;
     const int image_height = static_cast<int>(image_width / aspect_ratio);
     printf("P3 %d %d 255\n",image_width,image_height);
-    
+
     //camera 
     auto lookfrom=point3_t{8,2,5};
     auto lookat=point3_t{0,0,0};
@@ -176,26 +199,49 @@ int main(int argc, const char *argv[])
     
     world=rand_world();
 
-    int count=0;
-    fprintf(stderr,"completion %2d%%",count);
-    for(int i=image_height-1;i>=0;i--)
-    {
-        if(100.0*(image_height-i)/(image_height)>=count+2)
-            fprintf(stderr,"\b\b\b%2d%%",count+=2);
-        
-        for(int j=0;j<image_width;j++)
-        {
-            colour_t pixel_colour(0, 0, 0);
-            for(int k=0;k<50;k++)
-            {
-                auto v = (i+rand_double(-0.5,0.5)) / image_height;
-                auto u = (j+rand_double(-0.5,0.5)) / image_width;
-                auto r=camera.get_ray(u,v);
-                pixel_colour += ray_colour(r, world);
-            }
-            pixel_colour*=1.0/50;
-            write_clour(pixel_colour);
-        }
-    }
+    auto part=image_height/6;
+    vector<colour_t> v1,v2,v3,v4,v5,v6;
+    thread t1(image_render,image_height,image_width,image_height-0*part,image_height-1*part,camera,world,ref(v1));
+    thread t2(image_render,image_height,image_width,image_height-1*part,image_height-2*part,camera,world,ref(v2));
+    thread t3(image_render,image_height,image_width,image_height-2*part,image_height-3*part,camera,world,ref(v3));
+    thread t4(image_render,image_height,image_width,image_height-3*part,image_height-4*part,camera,world,ref(v4));
+    thread t5(image_render,image_height,image_width,image_height-4*part,image_height-5*part,camera,world,ref(v5));
+    thread t6(image_render,image_height,image_width,image_height-5*part,                  0,camera,world,ref(v6));
+    t1.join();t2.join();t3.join();t4.join();t5.join();t6.join();
+    for(auto &c:v1)
+        write_clour(c);
+    for(auto &c:v2)
+        write_clour(c);
+    for(auto &c:v3)
+        write_clour(c);
+    for(auto &c:v4)
+        write_clour(c);
+    for(auto &c:v5)
+        write_clour(c);
+    for(auto &c:v6)
+        write_clour(c);
     return 0;
+
+    // int count=0;
+    // fprintf(stderr,"completion %2d%%",count);
+    // for(int i=image_height-1;i>=0;i--)
+    // {
+    //     if(100.0*(image_height-i)/(image_height)>=count+2)
+    //         fprintf(stderr,"\b\b\b%2d%%",count+=2);
+        
+    //     for(int j=0;j<image_width;j++)
+    //     {
+    //         colour_t pixel_colour(0, 0, 0);
+    //         for(int k=0;k<50;k++)
+    //         {
+    //             auto v = (i+rand_double(-0.5,0.5)) / image_height;
+    //             auto u = (j+rand_double(-0.5,0.5)) / image_width;
+    //             auto r=camera.get_ray(u,v);
+    //             pixel_colour += ray_colour(r, world);
+    //         }
+    //         pixel_colour*=1.0/50;
+    //         write_clour(pixel_colour);
+    //     }
+    // }
+    // return 0;
 }
