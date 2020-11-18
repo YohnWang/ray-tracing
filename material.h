@@ -24,8 +24,8 @@ public:
     {
         auto scatter_direction = rec.normal.unit() + random_in_unit_sphere().unit();
         if(scatter_direction.near_zero())
-            return {true,albedo,{rec.p, rec.normal}};
-        return {true,albedo,{rec.p, scatter_direction}};
+            return {true,albedo,{rec.p, rec.normal,r_in.time()}};
+        return {true,albedo,{rec.p, scatter_direction,r_in.time()}};
     }
 };
 
@@ -40,8 +40,8 @@ public:
 
     virtual std::tuple<bool,colour_t,ray_t> scatter(const ray_t &r_in,const hit_record_t &rec) const override
     {
-        auto reflected = reflect(r_in.direction(),rec.normal) + fuzz*random_in_unit_sphere().unit();;
-        return {dot(reflected,rec.normal)>0,albedo,{rec.p, reflected}};
+        auto reflected = reflect(r_in.direction(),rec.normal).unit() + fuzz*random_in_unit_sphere().unit();;
+        return {dot(reflected,rec.normal)>0,albedo,{rec.p, reflected,r_in.time()}};
     }
 };
 
@@ -52,9 +52,10 @@ public:
     double ir; // Index of Refraction
     colour_t attenuation;
     bool is_fresnel_reflectance;
+    double fuzz;
 
     dielectric_t():dielectric_t(1,{1,1,1}){}
-    dielectric_t(double index_of_refraction,colour_t attenuation,bool fresnel_ref=false) : ir(index_of_refraction),attenuation(attenuation),is_fresnel_reflectance(fresnel_ref) {}
+    dielectric_t(double index_of_refraction,colour_t attenuation,double fuzz=0,bool fresnel_ref=true) : ir(index_of_refraction),attenuation(attenuation),is_fresnel_reflectance(fresnel_ref) {}
     dielectric_t(colour_t attenuation):dielectric_t(1,attenuation){}
     dielectric_t(double index_of_refraction):dielectric_t(index_of_refraction,{1,1,1}){}
 
@@ -75,8 +76,8 @@ public:
             direction = reflect(unit_direction, rec.normal);
         else
             direction = refract(unit_direction, rec.normal, refraction_ratio);
-
-        return {true,attenuation,ray_t(rec.p,direction)};
+        direction = direction + fuzz*random_in_unit_sphere();
+        return {true,attenuation,ray_t(rec.p,direction,r_in.time())};
     }
 private:
     static double reflectance(double cosine, double ref_idx)

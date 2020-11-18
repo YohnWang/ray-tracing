@@ -6,6 +6,7 @@
 #include<camera.h>
 #include<material.h>
 #include<thread>
+#include<moving_sphere.h>
 
 using namespace std;
 
@@ -136,12 +137,11 @@ hittable_list_t rand_world()
     auto material2 = make_shared<lambertian_t>(colour_t(0.4, 0.2, 0.1));
     world.add(make_shared<sphere_t>(point3_t(-4, 1, 0), 1.0, material2));
 
-    auto material3 = make_shared<metal_t>(colour_t(1, 1, 1), 0.0);
+    auto material3 = make_shared<metal_t>(colour_t(1, 1, 1), 1.0);
     world.add(make_shared<sphere_t>(point3_t(4, 1, 0), 1.0, material3));
 
-    auto material4 = make_shared<dielectric_t>(2);
-    world.add(make_shared<sphere_t>(point3_t(0, 1, 2.5), 1.0, material4));
-
+    auto material4 = make_shared<dielectric_t>(1.5,colour_t{1,1,1},0.01);
+    world.add(make_shared<moving_sphere_t>(point3_t(0, 1, 2.5),point3_t(0, 1, 2),0,1, 1.0, material4));
 
     return world;
 }
@@ -177,8 +177,8 @@ int main(int argc, const char *argv[])
 
     //camera 
     auto lookfrom=point3_t{8,2,5};
-    auto lookat=point3_t{0,0,0};
-    camera_t camera(lookfrom,lookat,{0,1,0},25,aspect_ratio);
+    auto lookat=point3_t{0,1,0};
+    camera_t camera(lookfrom,lookat,{0,1,0},25,aspect_ratio,0,0,0,1);
 
 
     auto lambertian1=make_shared<lambertian_t>(colour_t{0.6,0.9,0.4});
@@ -200,48 +200,19 @@ int main(int argc, const char *argv[])
     world=rand_world();
 
     auto part=image_height/6;
-    vector<colour_t> v1,v2,v3,v4,v5,v6;
-    thread t1(image_render,image_height,image_width,image_height-0*part,image_height-1*part,camera,world,ref(v1));
-    thread t2(image_render,image_height,image_width,image_height-1*part,image_height-2*part,camera,world,ref(v2));
-    thread t3(image_render,image_height,image_width,image_height-2*part,image_height-3*part,camera,world,ref(v3));
-    thread t4(image_render,image_height,image_width,image_height-3*part,image_height-4*part,camera,world,ref(v4));
-    thread t5(image_render,image_height,image_width,image_height-4*part,image_height-5*part,camera,world,ref(v5));
-    thread t6(image_render,image_height,image_width,image_height-5*part,                  0,camera,world,ref(v6));
+    //vector<colour_t> v1,v2,v3,v4,v5,v6;
+    vector<colour_t> v[6];
+    thread t1(image_render,image_height,image_width,image_height-0*part,image_height-1*part,camera,world,ref(v[0]));
+    thread t2(image_render,image_height,image_width,image_height-1*part,image_height-2*part,camera,world,ref(v[1]));
+    thread t3(image_render,image_height,image_width,image_height-2*part,image_height-3*part,camera,world,ref(v[2]));
+    thread t4(image_render,image_height,image_width,image_height-3*part,image_height-4*part,camera,world,ref(v[3]));
+    thread t5(image_render,image_height,image_width,image_height-4*part,image_height-5*part,camera,world,ref(v[4]));
+    thread t6(image_render,image_height,image_width,image_height-5*part,                  0,camera,world,ref(v[5]));
     t1.join();t2.join();t3.join();t4.join();t5.join();t6.join();
-    for(auto &c:v1)
-        write_clour(c);
-    for(auto &c:v2)
-        write_clour(c);
-    for(auto &c:v3)
-        write_clour(c);
-    for(auto &c:v4)
-        write_clour(c);
-    for(auto &c:v5)
-        write_clour(c);
-    for(auto &c:v6)
-        write_clour(c);
+    for(auto &thread_result:v)
+    {
+        for(auto &c:thread_result)
+            write_clour(c);
+    }
     return 0;
-
-    // int count=0;
-    // fprintf(stderr,"completion %2d%%",count);
-    // for(int i=image_height-1;i>=0;i--)
-    // {
-    //     if(100.0*(image_height-i)/(image_height)>=count+2)
-    //         fprintf(stderr,"\b\b\b%2d%%",count+=2);
-        
-    //     for(int j=0;j<image_width;j++)
-    //     {
-    //         colour_t pixel_colour(0, 0, 0);
-    //         for(int k=0;k<50;k++)
-    //         {
-    //             auto v = (i+rand_double(-0.5,0.5)) / image_height;
-    //             auto u = (j+rand_double(-0.5,0.5)) / image_width;
-    //             auto r=camera.get_ray(u,v);
-    //             pixel_colour += ray_colour(r, world);
-    //         }
-    //         pixel_colour*=1.0/50;
-    //         write_clour(pixel_colour);
-    //     }
-    // }
-    // return 0;
 }
