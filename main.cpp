@@ -22,7 +22,7 @@ public:
     sphere_t(point3_t center,double radius,shared_ptr<material_t> m=make_shared<lambertian_t>()):center(center),radius(radius),mat_ptr(m){}
 
     virtual std::pair<bool,hit_record_t> hit(const ray_t &r, double t_min, double t_max) const override;
-
+    virtual std::pair<bool,aabb_t> bounding_box(double time0, double time1) const override;
 };
 
 std::pair<bool,hit_record_t> sphere_t::hit(const ray_t& r, double t_min, double t_max)const
@@ -53,24 +53,30 @@ std::pair<bool,hit_record_t> sphere_t::hit(const ray_t& r, double t_min, double 
     return {true,rec};
 }
 
-std::pair<bool, hit_record_t> hittable_list_t::hit(const ray_t &r, double t_min, double t_max) const
+std::pair<bool,aabb_t> sphere_t::bounding_box(double time0, double time1) const
 {
-    hit_record_t temp_rec{};
-    bool hit_anything = false;
-    auto closest_so_far = t_max;
-
-    for (const auto &object : objects)
-    {
-        auto [is_hit,rec]=object->hit(r, t_min, closest_so_far);
-        if (is_hit)
-        {
-            hit_anything = true;
-            closest_so_far = rec.t;
-            temp_rec = rec;
-        }
-    }
-    return {hit_anything,temp_rec};
+    auto vec=vec3_t(radius,radius,radius);
+    return {true,aabb_t(center-vec,center+vec)};
 }
+
+// std::pair<bool, hit_record_t> hittable_list_t::hit(const ray_t &r, double t_min, double t_max) const
+// {
+//     hit_record_t temp_rec{};
+//     bool hit_anything = false;
+//     auto closest_so_far = t_max;
+
+//     for (const auto &object : objects)
+//     {
+//         auto [is_hit,rec]=object->hit(r, t_min, closest_so_far);
+//         if (is_hit)
+//         {
+//             hit_anything = true;
+//             closest_so_far = rec.t;
+//             temp_rec = rec;
+//         }
+//     }
+//     return {hit_anything,temp_rec};
+// }
 
 colour_t ray_colour(const ray_t &r,const hittable_list_t &world,int depth=50)
 {

@@ -18,6 +18,11 @@ inline double rand_double(double min, double max)
     return min + (max-min)*rand_uniform();
 }
 
+inline int rand_int(int min,int max)
+{
+    return int(rand_double(min,max));
+}
+
 inline double clamp(double x, double min, double max)
 {
     if (x < min)

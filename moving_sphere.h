@@ -16,6 +16,11 @@ public:
         point3_t cen0, point3_t cen1, double _time0, double _time1, double r, std::shared_ptr<material_t> m)
         : center0(cen0), center1(cen1), time0(_time0), time1(_time1), radius(r), mat_ptr(m){};
 
+    point3_t center(double time) const
+    {
+        return center0 + ((time - time0) / (time1 - time0))*(center1 - center0);
+    }
+
     virtual std::pair<bool, hit_record_t> hit(const ray_t &r, double t_min, double t_max) const override
     {
         auto AC = r.origin() - center(r.time());
@@ -45,9 +50,18 @@ public:
         return {true, rec};
     }
 
-    point3_t center(double time) const
+    virtual std::pair<bool, aabb_t> bounding_box(double time0,double time1)const override
     {
-        return center0 + ((time - time0) / (time1 - time0))*(center1 - center0);
+        auto vec=vec3_t(radius,radius,radius);
+        aabb_t box0(
+            center(time0)-vec,
+            center(time0)+vec
+        );
+        aabb_t box1(
+            center(time1)-vec,
+            center(time1)+vec
+        );
+        return {true,surrounding_box(box0,box1)};
     }
 };
 
