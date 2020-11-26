@@ -32,7 +32,7 @@ colour_t ray_colour(const ray_t &r,const hittable_list_t &world,int depth=50)
 hittable_list_t rand_world()
 {
     hittable_list_t world;
-    auto ground_material = make_shared<lambertian_t>(colour_t(0.1, 0.2, 0.7));
+    auto ground_material = make_shared<lambertian_t>(make_shared<checker_texture_t>(colour_t(0.2, 0.3, 0.1), colour_t(0.9, 0.9, 0.9)));
     world.add(make_shared<sphere_t>(point3_t(0, -1000, 0), 1000, ground_material));
 
     for (int a = -11; a < 11; a+=2)
@@ -77,7 +77,7 @@ hittable_list_t rand_world()
     auto material2 = make_shared<lambertian_t>(colour_t(0.4, 0.2, 0.1));
     world.add(make_shared<sphere_t>(point3_t(-4, 1, 0), 1.0, material2));
 
-    auto material3 = make_shared<metal_t>(colour_t(1, 1, 1), 1.0);
+    auto material3 = make_shared<metal_t>(colour_t(1, 1, 1));
     world.add(make_shared<sphere_t>(point3_t(4, 1, 0), 1.0, material3));
 
     auto material4 = make_shared<dielectric_t>(1.5,colour_t{1,1,1},0.01);
@@ -119,6 +119,7 @@ int main(int argc, const char *argv[])
     //camera 
     auto lookfrom=point3_t{8,2,5};
     auto lookat=point3_t{0,1,0};
+    lookfrom=lookfrom+(lookfrom-lookat).unit()*2;
     camera_t camera(lookfrom,lookat,{0,1,0},25,aspect_ratio,0,0,0,1);
 
 

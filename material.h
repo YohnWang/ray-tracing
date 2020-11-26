@@ -5,7 +5,7 @@
 #include<hittable.h>
 #include<vec3.h>
 #include<utility>
-
+#include<texture.h>
 
 class material_t
 {
@@ -16,16 +16,18 @@ public:
 class lambertian_t:public material_t
 {
 public:
-    colour_t albedo;
-    lambertian_t():lambertian_t({0,0,0}){};
-    lambertian_t(const colour_t &albedo):albedo(albedo){}
+    std::shared_ptr<texture_t> albedo;
+    lambertian_t():lambertian_t(colour_t{0,0,0}){};
+    lambertian_t(const colour_t &c):albedo(std::make_shared<solid_colour_t>(c)){}
+    lambertian_t(std::shared_ptr<texture_t> a):albedo(a){}
 
     virtual std::tuple<bool,colour_t,ray_t> scatter(const ray_t &r_in,const hit_record_t &rec) const override
     {
         auto scatter_direction = rec.normal.unit() + random_in_unit_sphere().unit();
+        auto attenuation = albedo->value(rec.u, rec.v, rec.p);
         if(scatter_direction.near_zero())
-            return {true,albedo,{rec.p, rec.normal,r_in.time()}};
-        return {true,albedo,{rec.p, scatter_direction,r_in.time()}};
+            return {true,attenuation,{rec.p, rec.normal,r_in.time()}};
+        return {true,attenuation,{rec.p, scatter_direction,r_in.time()}};
     }
 };
 

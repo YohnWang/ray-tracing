@@ -8,6 +8,12 @@
 
 class sphere_t:public hittable_t
 {
+    static std::pair<double,double> get_uv(point3_t p)
+    {
+        auto theta = acos(-p.y);
+        auto phi = atan2(-p.z, p.x) + pi;
+        return {phi/(2*pi),theta/pi};
+    }
 public:
     point3_t center;
     double   radius;
@@ -42,6 +48,7 @@ public:
         auto outward_normal = (rec.p - center) / radius;
         rec.set_face_normal(r, outward_normal);
         rec.mat_ptr = mat_ptr;
+        std::tie(rec.u,rec.v)=get_uv(outward_normal);
         return {true, rec};
     }
     virtual std::pair<bool,aabb_t> bounding_box(double time0, double time1) const override
