@@ -32,7 +32,7 @@ colour_t ray_colour(const ray_t &r,const hittable_list_t &world,int depth=50)
 hittable_list_t rand_world()
 {
     hittable_list_t world;
-    auto ground_material = make_shared<lambertian_t>(make_shared<checker_texture_t>(colour_t(0.2, 0.3, 0.1), colour_t(0.9, 0.9, 0.9)));
+    auto ground_material = make_shared<lambertian_t>(make_shared<checker_texture_t>(colour_t(0.2, 0.3, 0.6), colour_t(0.9, 0.9, 0.9)));
     world.add(make_shared<sphere_t>(point3_t(0, -1000, 0), 1000, ground_material));
 
     for (int a = -11; a < 11; a+=2)
@@ -48,9 +48,20 @@ hittable_list_t rand_world()
                 if (choose_mat < 0.8)
                 {
                     // diffuse
-                    auto albedo = colour_t::random() * colour_t::random();
-                    sphere_material = make_shared<lambertian_t>(albedo);
-                    world.add(make_shared<sphere_t>(center, 0.2, sphere_material));
+                    if(choose_mat<0.3)
+                    {
+                        auto albedo = colour_t::random() * colour_t::random();
+                        auto tex=make_shared<checker_texture_t>(albedo,colour_t(1,1,1)-albedo);
+                        sphere_material=make_shared<lambertian_t>(tex);
+                        world.add(make_shared<sphere_t>(center, 0.2, sphere_material));
+                    }
+                    else 
+                    {
+                        auto albedo = colour_t::random() * colour_t::random();
+                        sphere_material = make_shared<lambertian_t>(albedo);
+                        world.add(make_shared<sphere_t>(center, 0.2, sphere_material));
+                    }
+                    
                 }
                 else if (choose_mat < 0.95)
                 {
@@ -87,7 +98,7 @@ hittable_list_t rand_world()
 }
 
 
-void image_render(int image_height,int image_width,int image_height_begin,int image_height_end,camera_t camera,hittable_list_t world,vector<colour_t> &out)
+void image_render(int image_height,int image_width,int image_height_begin,int image_height_end,const camera_t &camera,const hittable_list_t &world,vector<colour_t> &out)
 {
     for(int i=image_height_begin-1;i>=image_height_end;i--)
     {   
@@ -141,17 +152,21 @@ int main(int argc, const char *argv[])
     
     world=rand_world();
 
-    auto part=image_height/6;
-    //vector<colour_t> v1,v2,v3,v4,v5,v6;
-    vector<colour_t> v[6];
-    thread t1(image_render,image_height,image_width,image_height-0*part,image_height-1*part,camera,world,ref(v[0]));
-    thread t2(image_render,image_height,image_width,image_height-1*part,image_height-2*part,camera,world,ref(v[1]));
-    thread t3(image_render,image_height,image_width,image_height-2*part,image_height-3*part,camera,world,ref(v[2]));
-    thread t4(image_render,image_height,image_width,image_height-3*part,image_height-4*part,camera,world,ref(v[3]));
-    thread t5(image_render,image_height,image_width,image_height-4*part,image_height-5*part,camera,world,ref(v[4]));
-    thread t6(image_render,image_height,image_width,image_height-5*part,                  0,camera,world,ref(v[5]));
-    t1.join();t2.join();t3.join();t4.join();t5.join();t6.join();
-    for(auto &thread_result:v)
+    constexpr int thread_num=10;
+    constexpr auto part=image_height/thread_num;
+    vector<vector<colour_t>> output(thread_num);
+    vector<thread> thread_pool(thread_num);
+    for(int i=0;i<thread_num;i++)
+    {
+        auto start=image_height-i*part;
+        auto end  =image_height-(i+1)*part;
+        if(i==thread_num-1) end=0;
+        thread_pool[i]=thread(image_render,image_height,image_width,start,end,cref(camera),cref(world),ref(output[i]));
+    }
+    for(auto &t:thread_pool)
+        t.join();
+
+    for(auto &thread_result:output)
     {
         for(auto &c:thread_result)
             write_clour(c);
