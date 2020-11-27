@@ -3,6 +3,7 @@
 
 #include<vec3.h>
 #include<memory>
+#include<perlin.h>
 
 class texture_t
 {
@@ -39,6 +40,22 @@ public:
         else
             return even->value(u, v, p);
     }
+};
+
+class noise_texture_t : public texture_t
+{
+public:
+    perlin_t noise;
+    double   scale=1;
+
+    noise_texture_t() {}
+    noise_texture_t(double scale):scale(scale){}
+
+    virtual colour_t value(double u, double v, const point3_t &p) const override
+    {
+        return colour_t(1, 1, 1) * noise.turb(scale*p);
+    }
+
 };
 
 #endif
