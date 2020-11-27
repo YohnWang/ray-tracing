@@ -176,19 +176,6 @@ vec3_t random_in_unit_disk()
     }
 }
 
-inline vec3_t reflect(const vec3_t &v, const vec3_t &n)
-{
-    return v - 2 * dot(v, n.unit()) * n.unit();
-}
-
-inline vec3_t refract(const vec3_t &uv, const vec3_t &n, double etai_over_etat)
-{
-    auto cos_theta = fmin(dot(-uv, n), 1.0);
-    vec3_t r_out_perp = etai_over_etat * (uv + cos_theta * n);
-    vec3_t r_out_parallel = -sqrt(fabs(1.0 - r_out_perp.len_squared())) * n;
-    return r_out_perp + r_out_parallel;
-}
-
 using colour_t=vec3_t;
 using point3_t=vec3_t;
 
@@ -198,7 +185,6 @@ inline void write_clour(const colour_t &pixel_colour)
     int g=static_cast<int>(clamp(sqrt(pixel_colour.y),0,0.999)*256);
     int b=static_cast<int>(clamp(sqrt(pixel_colour.z),0,0.999)*256);
     std::printf("%d %d %d\n",r,g,b);
-    //std::printf("%c%c%c",b,g,r);
 }
 
 #endif
