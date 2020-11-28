@@ -11,6 +11,7 @@ class material_t
 {
 public:
     virtual std::tuple<bool,colour_t,ray_t> scatter(const ray_t &r_in,const hit_record_t &rec) const = 0;
+    virtual colour_t emitted(double u,double v,const point3_t &p)const{ return {0,0,0}; }
 };
 
 class lambertian_t:public material_t
@@ -88,6 +89,23 @@ private:
         auto r0 = (1 - ref_idx) / (1 + ref_idx);
         r0 = r0 * r0;
         return r0 + (1 - r0) * pow((1 - cosine), 5);
+    }
+};
+
+class diffuse_light_t : public material_t  
+{
+public:
+    std::shared_ptr<texture_t> emit;
+    diffuse_light_t(std::shared_ptr<texture_t> a) : emit(a) {}
+    diffuse_light_t(colour_t c) : emit(std::make_shared<solid_colour_t>(c)) {}
+
+    virtual std::tuple<bool, colour_t, ray_t> scatter(const ray_t &r_in, const hit_record_t &rec) const override
+    {
+        return {false, {}, {}};
+    }
+    virtual colour_t emitted(double u, double v, const point3_t &p) const
+    {
+        return emit->value(u, v, p);
     }
 };
 

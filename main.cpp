@@ -12,21 +12,20 @@
 using namespace std;
 
 
-colour_t ray_colour(const ray_t &r,const hittable_list_t &world,int depth=50)
+colour_t ray_colour(const ray_t &r,const hittable_list_t &world,const colour_t &background={0,0,0},int depth=50)
 {
     if(depth<=0)
         return {0,0,0};
     auto [is_hit,rec]=world.hit(r, 0.001, infinity);
-    if (is_hit) 
-    {
-        auto [is_reflect,attenuation,scattered]=rec.mat_ptr->scatter(r,rec);
-        if(is_reflect)
-            return attenuation*ray_colour(scattered,world,depth-1);
-        else 
-            return {0,0,0};
-    }
-    auto t=(r.dir.unit().y+1.0)*0.5;
-    return (1-t)*colour_t(1,1,1)+t*colour_t(0.5, 0.7, 1);
+    if(is_hit==false)
+        return background;
+
+    auto [is_reflect, attenuation, scattered] = rec.mat_ptr->scatter(r, rec);
+    auto emitted=rec.mat_ptr->emitted(rec.u,rec.v,rec.p);
+    if (is_reflect)
+        return emitted + attenuation * ray_colour(scattered, world, background, depth - 1);
+    else
+        return emitted;
 }
 
 hittable_list_t rand_world()
@@ -86,7 +85,7 @@ hittable_list_t rand_world()
     world.add(make_shared<sphere_t>(point3_t(0, 1, 0), 1.0, material1));
     world.add(make_shared<sphere_t>(point3_t(0, 1, 0), -0.9, material1));
 
-    auto material2 = make_shared<lambertian_t>(colour_t(0.4, 0.2, 0.1));
+    auto material2 = make_shared<diffuse_light_t>(colour_t(2, 2, 2));
     world.add(make_shared<sphere_t>(point3_t(-4, 1, 0), 1.0, material2));
 
     auto material3 = make_shared<metal_t>(colour_t(1, 1, 1));
@@ -107,7 +106,7 @@ void image_render(int image_height,int image_width,int image_height_begin,int im
     {   
         for(int j=0;j<image_width;j++)
         {
-            constexpr int samples=20;
+            constexpr int samples=500;
             colour_t pixel_colour(0, 0, 0);
             for(int k=0;k<samples;k++)
             {
@@ -155,7 +154,7 @@ int main(int argc, const char *argv[])
     
     world=rand_world();
 
-    constexpr int thread_num=10;
+    constexpr int thread_num=12;
     constexpr auto part=image_height/thread_num;
     vector<vector<colour_t>> output(thread_num);
     vector<thread> thread_pool(thread_num);
