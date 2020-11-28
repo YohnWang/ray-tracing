@@ -8,6 +8,7 @@
 #include<thread>
 #include<sphere.h>
 #include<moving_sphere.h>
+#include<aarect.h>
 
 using namespace std;
 
@@ -96,9 +97,32 @@ hittable_list_t rand_world()
 
     //auto material5 = make_shared<lambertian_t>(make_shared<noise_texture_t>());
     //world.add(make_shared<sphere_t>(point3_t(0, 1, 2.5)-vec3_t(8,1,5).unit()*2, 1.0, material5));
+
+    world.add(make_shared<rect_t>(vec3_t(0,0,-1),point3_t(0,0,0),point3_t(2,1,1),material2));
+
     return world;
 }
 
+hittable_list_t cornell_box() 
+{
+    hittable_list_t objects;
+
+    auto red   = make_shared<lambertian_t>(colour_t(.65, .05, .05));
+    auto white = make_shared<lambertian_t>(colour_t(.73, .73, .73));
+    auto green = make_shared<lambertian_t>(colour_t(.12, .45, .15));
+    auto light = make_shared<diffuse_light_t>(colour_t(15, 15, 15));
+    auto light1 = make_shared<diffuse_light_t>(colour_t(15, 15, 5));
+
+    objects.add(make_shared<rect_t>(vec3_t(1,0,0), point3_t(0,0,-100),point3_t(0,100,0), green)); //left
+    objects.add(make_shared<rect_t>(vec3_t(-1,0,0),point3_t(100,0,-100),point3_t(100,100,0), red)); //right
+    objects.add(make_shared<rect_t>(vec3_t(0,-1,0),point3_t(40,100-0.0001,-65),point3_t(60,100-0.0001,-35), light));
+    objects.add(make_shared<rect_t>(vec3_t(0,0,1),point3_t(0,0,-100),point3_t(100,100,-100), white)); //back
+    objects.add(make_shared<rect_t>(vec3_t(0,-1,0),point3_t(0,100,-100),point3_t(100,100,0), white)); //up
+    objects.add(make_shared<rect_t>(vec3_t(0,1,0),point3_t(0,0,-100),point3_t(100,0,0), white)); //down
+    //objects.add(make_shared<sphere_t>(point3_t(50,50,-50),10, light));
+
+    return objects;
+}
 
 void image_render(int image_height,int image_width,int image_height_begin,int image_height_end,const camera_t &camera,const hittable_list_t &world,vector<colour_t> &out)
 {
@@ -106,7 +130,7 @@ void image_render(int image_height,int image_width,int image_height_begin,int im
     {   
         for(int j=0;j<image_width;j++)
         {
-            constexpr int samples=500;
+            constexpr int samples=100;
             colour_t pixel_colour(0, 0, 0);
             for(int k=0;k<samples;k++)
             {
@@ -124,16 +148,18 @@ void image_render(int image_height,int image_width,int image_height_begin,int im
 int main(int argc, const char *argv[])
 {
     //image
-    const auto aspect_ratio = 16.0 / 9.0;
-    const int image_width = 1024;
+    const auto aspect_ratio = 9.0 / 9.0;
+    const int image_width = 512;
     const int image_height = static_cast<int>(image_width / aspect_ratio);
     printf("P3 %d %d 255\n",image_width,image_height);
 
     //camera 
-    auto lookfrom=point3_t{8,2,5};
-    auto lookat=point3_t{0,1,0};
-    lookfrom=lookfrom+(lookfrom-lookat).unit()*2;
-    camera_t camera(lookfrom,lookat,{0,1,0},25,aspect_ratio,0,0,0,1);
+    // auto lookfrom=point3_t{8,2,5};
+    // auto lookat=point3_t{0,1,0};
+    auto lookfrom=point3_t{50,50,150};
+    auto lookat=point3_t{50,50,-10};
+    //lookfrom=lookfrom+(lookfrom-lookat).unit()*2;
+    camera_t camera(lookfrom,lookat,{0,1,0},37,aspect_ratio,0,0,0,1);
 
 
     auto lambertian1=make_shared<lambertian_t>(colour_t{0.6,0.9,0.4});
@@ -152,7 +178,8 @@ int main(int argc, const char *argv[])
     // world.add(make_shared<sphere_t>(point3_t(1,0,-1),0.5,metal3));
     // world.add(make_shared<sphere_t>(point3_t(0,0,-20000),9900,metal2));
     
-    world=rand_world();
+    //world=rand_world();
+    world=cornell_box();
 
     constexpr int thread_num=12;
     constexpr auto part=image_height/thread_num;
