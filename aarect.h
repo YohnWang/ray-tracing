@@ -57,6 +57,15 @@ public:
         else 
             return false;
     }
+
+    void move(vec3_t direction)
+    {
+        min=min+direction;
+        max=max+direction;
+        constexpr auto e=1e-8;
+        d=-dot(n,min+vec3_t(e,e,e));
+    }
+
 };
 
 #endif

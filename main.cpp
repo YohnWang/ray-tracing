@@ -9,6 +9,7 @@
 #include<sphere.h>
 #include<moving_sphere.h>
 #include<aarect.h>
+#include<box.h>
 
 using namespace std;
 
@@ -115,10 +116,16 @@ hittable_list_t cornell_box()
 
     objects.add(make_shared<rect_t>(vec3_t(1,0,0), point3_t(0,0,-100),point3_t(0,100,0), green)); //left
     objects.add(make_shared<rect_t>(vec3_t(-1,0,0),point3_t(100,0,-100),point3_t(100,100,0), red)); //right
-    objects.add(make_shared<rect_t>(vec3_t(0,-1,0),point3_t(40,100-0.0001,-65),point3_t(60,100-0.0001,-35), light));
+    objects.add(make_shared<rect_t>(vec3_t(0,-1,0),point3_t(20,100-0.0001,-65),point3_t(80,100-0.0001,-35), light));
     objects.add(make_shared<rect_t>(vec3_t(0,0,1),point3_t(0,0,-100),point3_t(100,100,-100), white)); //back
     objects.add(make_shared<rect_t>(vec3_t(0,-1,0),point3_t(0,100,-100),point3_t(100,100,0), white)); //up
     objects.add(make_shared<rect_t>(vec3_t(0,1,0),point3_t(0,0,-100),point3_t(100,0,0), white)); //down
+
+    auto box=make_shared<box_t>(point3_t(20,0,-40),point3_t(80,60,-60),green);
+    box->move({0,20,0});
+    objects.add(box);
+
+    objects.add(std::make_shared<rect_t>(vec3_t(-1,0,0),point3_t(20,0,-60),point3_t(80,60,-40)-vec3_t(20,0,0),red));
 
     return objects;
 }
