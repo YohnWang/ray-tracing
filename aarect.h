@@ -14,9 +14,11 @@ public:
     rect_t()=default;
     rect_t(vec3_t normal,point3_t a,point3_t b,std::shared_ptr<material_t> mat):n(normal),mat_ptr(mat)
     {
-        min=vec3_t(fmin(a.x,b.x),fmin(a.y,b.y),fmin(a.z,b.z));
-        max=vec3_t(fmax(a.x,b.x),fmax(a.y,b.y),fmax(a.z,b.z));
+        constexpr auto e=1e-8;
+        min=point3_t(fmin(a.x,b.x),fmin(a.y,b.y),fmin(a.z,b.z));
         d=-dot(n,min);
+        min-=vec3_t(e,e,e);
+        max=point3_t(fmax(a.x,b.x),fmax(a.y,b.y),fmax(a.z,b.z))+vec3_t(e,e,e);
     }
     virtual std::pair<bool, hit_record_t> hit(const ray_t &r, double t_min, double t_max) const override
     {
@@ -47,10 +49,9 @@ public:
 
     bool is_in_rect(const point3_t &p) const
     {
-        constexpr auto e=1e-8;
-        auto x_in=p.x>=min.x-e && p.x<=max.x+e;
-        auto y_in=p.y>=min.y-e && p.y<=max.y+e;
-        auto z_in=p.z>=min.z-e && p.z<=max.z+e;
+        auto x_in=p.x>=min.x && p.x<=max.x;
+        auto y_in=p.y>=min.y && p.y<=max.y;
+        auto z_in=p.z>=min.z && p.z<=max.z;
         if( x_in && y_in && z_in )
             return true;
         else 

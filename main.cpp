@@ -111,7 +111,7 @@ hittable_list_t cornell_box()
     auto white = make_shared<lambertian_t>(colour_t(.73, .73, .73));
     auto green = make_shared<lambertian_t>(colour_t(.12, .45, .15));
     auto light = make_shared<diffuse_light_t>(colour_t(15, 15, 15));
-    auto light1 = make_shared<diffuse_light_t>(colour_t(15, 15, 5));
+    auto light1 = make_shared<diffuse_light_t>(colour_t(1, 1, 1));
 
     objects.add(make_shared<rect_t>(vec3_t(1,0,0), point3_t(0,0,-100),point3_t(0,100,0), green)); //left
     objects.add(make_shared<rect_t>(vec3_t(-1,0,0),point3_t(100,0,-100),point3_t(100,100,0), red)); //right
@@ -119,7 +119,6 @@ hittable_list_t cornell_box()
     objects.add(make_shared<rect_t>(vec3_t(0,0,1),point3_t(0,0,-100),point3_t(100,100,-100), white)); //back
     objects.add(make_shared<rect_t>(vec3_t(0,-1,0),point3_t(0,100,-100),point3_t(100,100,0), white)); //up
     objects.add(make_shared<rect_t>(vec3_t(0,1,0),point3_t(0,0,-100),point3_t(100,0,0), white)); //down
-    //objects.add(make_shared<sphere_t>(point3_t(50,50,-50),10, light));
 
     return objects;
 }
@@ -147,6 +146,7 @@ void image_render(int image_height,int image_width,int image_height_begin,int im
 
 int main(int argc, const char *argv[])
 {
+    //srand(time(NULL));
     //image
     const auto aspect_ratio = 9.0 / 9.0;
     const int image_width = 512;
@@ -156,8 +156,8 @@ int main(int argc, const char *argv[])
     //camera 
     // auto lookfrom=point3_t{8,2,5};
     // auto lookat=point3_t{0,1,0};
-    auto lookfrom=point3_t{50,50,150};
-    auto lookat=point3_t{50,50,-10};
+    auto lookfrom=point3_t{50,50,150};//-vec3_t(1000,1000,1000);
+    auto lookat=point3_t{50,50,-10};//-vec3_t(1000,1000,1000);
     //lookfrom=lookfrom+(lookfrom-lookat).unit()*2;
     camera_t camera(lookfrom,lookat,{0,1,0},37,aspect_ratio,0,0,0,1);
 

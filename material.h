@@ -109,4 +109,14 @@ public:
     }
 };
 
+class material_test_t:public material_t
+{
+public:
+    virtual std::tuple<bool,colour_t,ray_t> scatter(const ray_t &r_in,const hit_record_t &rec) const override
+    {
+        return {false,{},{}};
+    }
+    virtual colour_t emitted(double u,double v,const point3_t &p)const{ return (p.unit()+colour_t{1,1,1})*0.5; }
+};
+
 #endif

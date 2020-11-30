@@ -58,4 +58,14 @@ public:
 
 };
 
+class tex_test_t:public texture_t
+{
+public:
+    virtual colour_t value(double u,double v,const point3_t &p)const override
+    {
+        //return colour_t(p.unit());
+        return {0.5,0.5,0};
+    }
+};
+
 #endif

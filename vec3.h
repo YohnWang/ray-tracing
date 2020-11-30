@@ -165,6 +165,14 @@ inline vec3_t random_in_unit_sphere()
     }
 }
 
+inline vec3_t random_in_hemisphere(const vec3_t& normal) {
+    vec3_t in_unit_sphere = random_in_unit_sphere();
+    if (dot(in_unit_sphere, normal) > 0.0) // In the same hemisphere as the normal
+        return in_unit_sphere;
+    else
+        return -in_unit_sphere;
+}
+
 vec3_t random_in_unit_disk()
 {
     while (true)
