@@ -24,21 +24,31 @@ public:
 
     virtual std::pair<bool,hit_record_t> hit(const ray_t &r, double t_min, double t_max) const override
     {
-        auto AC = r.origin() - center;
-        auto a = dot(r.direction(), r.direction());
-        auto b = 2 * dot(r.direction(), AC);
-        auto c = dot(AC, AC) - radius * radius;
-        auto discriminant = b * b - 4 * a * c;
+        auto CA = r.origin() - center;
+        // auto a = dot(r.direction(), r.direction());
+        // auto b = 2 * dot(r.direction(), CA);
+        // auto c = dot(CA, CA) - radius * radius;
+
+        //auto discriminant = b * b - 4 * a * c;
+
+        auto bh=dot(r.direction(),CA);
+        auto bb=dot(r.direction(), r.direction());
+        auto hh=dot(CA, CA);
+
+        auto discriminant = bh*bh-bb*(hh-radius*radius);
+
         if (discriminant < 0)
             return {false, {}};
 
         // Find the nearest root that lies in the acceptable range.
         auto sqrtd = sqrt(discriminant);
 
-        auto root = (-b - sqrtd) / (2 * a);
+        //auto root = (-b - sqrtd) / (2 * a);
+        auto root = (-bh - sqrtd) / bb;
         if (root < t_min || t_max < root)
         {
-            root = (-b + sqrtd) / (2 * a);
+            //root = (-b + sqrtd) / (2 * a);
+            root = (-bh + sqrtd) / bb;
             if (root < t_min || t_max < root)
                 return {false, {}};
         }
