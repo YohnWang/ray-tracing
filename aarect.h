@@ -3,6 +3,7 @@
 
 #include<aabb.h>
 #include<hittable.h>
+#include<plane.h>
 
 class rect_t:public hittable_t
 {
@@ -66,6 +67,43 @@ public:
         d=-dot(n,min+vec3_t(e,e,e));
     }
 
+};
+
+class xrect_t:public hittable_t
+{
+public:
+    plane_t rect;
+
+    xrect_t(){};
+    //xrect_t(const xrect_t &&)=default;
+    xrect_t(point3_t center,vec3_t width,vec3_t height,std::shared_ptr<material_t> mat):rect(center,width,height,mat){}
+    virtual std::pair<bool, hit_record_t> hit(const ray_t &r, double t_min, double t_max) const override
+    {
+        auto [is_hit,rec]=rect.hit(r,t_min,t_max);
+        if(is_hit==false)
+            return {false,{}};
+        
+        auto v=rec.p-(rect.center-0.5*rect.width-0.5*rect.height);
+        auto width_dot=dot(v,rect.width.unit());
+        auto height_dot=dot(v,rect.height.unit());
+        auto in_width= width_dot>=0 && width_dot <= rect.width.len() ;
+        auto in_height= height_dot>=0 && height_dot <= rect.height.len();
+        if(in_width && in_height)
+            return {true,rec};
+        return {false,{}};
+    }
+    virtual std::pair<bool, aabb_t> bounding_box(double time0,double time1)const override
+    {
+        return rect.bounding_box(time0,time1);
+    }
+    void move(vec3_t direction)
+    {
+        rect.move(direction);
+    }
+    void rotate_y(double theta)
+    {
+        rect.rotate_y(theta);
+    }
 };
 
 #endif

@@ -34,7 +34,8 @@ public:
     checker_texture_t(colour_t c1,colour_t c2):checker_texture_t(std::make_shared<solid_colour_t>(c1),std::make_shared<solid_colour_t>(c2)){}
     virtual colour_t value(double u,double v,const point3_t &p)const override
     {
-        auto sines = sin(10 * p.x) * sin(10 * p.y) * sin(10 * p.z);
+        //auto sines = sin(10 * p.x) * sin(10 * p.y) * sin(10 * p.z);
+        auto sines = sin(10*u) * sin(10*v);
         if (sines < 0)
             return odd->value(u, v, p);
         else
