@@ -109,6 +109,20 @@ public:
     }
 };
 
+class isotropic_t:public material_t
+{
+public:
+    std::shared_ptr<texture_t> albedo;
+
+    isotropic_t(colour_t c):albedo{std::make_shared<solid_colour_t>(c)}{}
+    isotropic_t(std::shared_ptr<texture_t> a):albedo{a}{}
+    virtual std::tuple<bool,colour_t,ray_t> scatter(const ray_t &r_in,const hit_record_t &rec) const override
+    {
+        auto ray=ray_t(rec.p,random_in_unit_sphere(),r_in.time());
+        return {true,albedo->value(rec.u,rec.v,rec.p),ray};
+    }
+};
+
 class material_test_t:public material_t
 {
 public:

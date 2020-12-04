@@ -11,6 +11,7 @@
 #include<aarect.h>
 #include<box.h>
 #include<plane.h>
+#include<constant_medium.h>
 
 using namespace std;
 
@@ -122,9 +123,12 @@ hittable_list_t cornell_box()
     objects.add(make_shared<rect_t>(vec3_t(0,-1,0),point3_t(0,100,-100),point3_t(100,100,0), white)); //up
     objects.add(make_shared<rect_t>(vec3_t(0,1,0),point3_t(0,0,-100),point3_t(100,0,0), white)); //down
 
-    auto box=make_shared<xbox_t>(point3_t(30,25,-50),20,50,20,green);
-    box->rotate_y(-30);
-    objects.add(box);
+    auto box1=make_shared<xbox_t>(point3_t(20,40,-60),30,50,30,green);
+    auto box2=make_shared<xbox_t>(point3_t(60,70,-50),50,80,50,green);
+    box1->rotate_y(10);
+    box2->rotate_y(-10);
+    objects.add(make_shared<constant_medium_t>(box1, 0.02, colour_t(0,0,0)));
+    objects.add(make_shared<constant_medium_t>(box2, 0.02, colour_t(1,1,1)));
     // auto glass=make_shared<dielectric_t>(1.5,colour_t{1,1,1},0);
     // auto box=make_shared<box_t>(point3_t(20,0,-20),point3_t(80,60,-80),glass);
     
