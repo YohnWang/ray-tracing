@@ -6,7 +6,6 @@
 class plane_t:public hittable_t
 {
 public:
-    
     point3_t center;
     vec3_t width;
     vec3_t height;
@@ -57,30 +56,30 @@ public:
         theta=pi/180.0*theta;
         auto cos_theta=cos(theta);
         auto sin_theta=sin(theta);
-        width=vec3_t(
-            dot(vec3_t(cos_theta,0,sin_theta),width),
-            dot(vec3_t(0,1,0),width),
-            dot(vec3_t(-sin_theta,0,cos_theta),width)
-        );
-        height=vec3_t(
-            dot(vec3_t(cos_theta,0,sin_theta),height),
-            dot(vec3_t(0,1,0),height),
-            dot(vec3_t(-sin_theta,0,cos_theta),height)
-        );
-        //n=cross(width,height); 
-        n=vec3_t(
-            dot(vec3_t(cos_theta,0,sin_theta),n),
-            dot(vec3_t(0,1,0),n),
-            dot(vec3_t(-sin_theta,0,cos_theta),n)
-        );
+        auto rotate=[&cos_theta,&sin_theta](vec3_t vec){
+            return vec3_t(
+                dot(vec3_t(cos_theta,0,sin_theta),vec),
+                dot(vec3_t(0,1,0),vec),
+                dot(vec3_t(-sin_theta,0,cos_theta),vec));
+        };
+        center=rotate(center);
+        width=rotate(width);
+        height=rotate(height);
+        n=rotate(n);
         d=-dot(n,center);
+    }
+
+    void rotate_y(point3_t p,double theta)
+    {
+        vec3_t mv_vec=vec3_t(p.x,0,p.z);
+        move(-mv_vec);
+        rotate_y(theta);
+        move(mv_vec);
     }
 
     void rotate(point3_t p,vec3_t axis,double theta)
     {
-        auto D= -dot(p,n);
-        auto distance=(dot(axis,center)+D)/(axis.len());
-        auto cos_theta=cos(theta);
+        
     }
 
 };

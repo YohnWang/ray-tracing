@@ -84,6 +84,11 @@ public:
         return {false,aabb_t()};
     }
 
+    void rotate_y(double theta)
+    {
+        for(auto &side:sides)
+            side.rotate_y(center,theta);
+    }
 };
 
 #endif

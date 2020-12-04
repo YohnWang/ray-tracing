@@ -104,6 +104,10 @@ public:
     {
         rect.rotate_y(theta);
     }
+    void rotate_y(point3_t p,double theta)
+    {
+        rect.rotate_y(p,theta);
+    }
 };
 
 #endif

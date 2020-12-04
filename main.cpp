@@ -122,8 +122,9 @@ hittable_list_t cornell_box()
     objects.add(make_shared<rect_t>(vec3_t(0,-1,0),point3_t(0,100,-100),point3_t(100,100,0), white)); //up
     objects.add(make_shared<rect_t>(vec3_t(0,1,0),point3_t(0,0,-100),point3_t(100,0,0), white)); //down
 
-
-    objects.add(make_shared<xbox_t>(point3_t(30,15,-50),20,30,50,green));
+    auto box=make_shared<xbox_t>(point3_t(30,25,-50),20,50,20,green);
+    box->rotate_y(-30);
+    objects.add(box);
     // auto glass=make_shared<dielectric_t>(1.5,colour_t{1,1,1},0);
     // auto box=make_shared<box_t>(point3_t(20,0,-20),point3_t(80,60,-80),glass);
     
@@ -135,7 +136,7 @@ hittable_list_t cornell_box()
     // objects.add(std::make_shared<sphere_t>(point3_t(50,50,-150),100,tex));
     // auto plane=make_shared<xrect_t>(point3_t(50,50,130),vec3_t(10,0,0),vec3_t(0,10,0), tex);
     // plane->rotate_y(60);
-     objects.add(make_shared<plane_t>(point3_t(0,0,1000),vec3_t(1,0,0),vec3_t(0,1,0), light1));
+     //objects.add(make_shared<plane_t>(point3_t(0,0,1000),vec3_t(1,0,0),vec3_t(0,1,0), light1));
     //objects.add(make_shared<xrect_t>(point3_t(50,50,100),vec3_t(10,0,0),vec3_t(0,10,0), tex));
     //objects.add(plane);
     return objects;
