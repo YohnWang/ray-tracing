@@ -53,8 +53,8 @@ public:
     point3_t center;
     xbox_t(point3_t center,double xlen,double ylen,double zlen,std::shared_ptr<material_t> ptr):center(center)
     {
-        sides[0]=xrect_t(center-vec3_t(0,ylen*0.5,0),{-xlen,0,0},{0,0,zlen},ptr);//down
-        sides[1]=xrect_t(center+vec3_t(0,ylen*0.5,0),{xlen,0,0},{0,0,zlen},ptr);//up
+        sides[0]=xrect_t(center-vec3_t(0,ylen*0.5,0),{xlen,0,0},{0,0,zlen},ptr);//down
+        sides[1]=xrect_t(center+vec3_t(0,ylen*0.5,0),{-xlen,0,0},{0,0,zlen},ptr);//up
         sides[2]=xrect_t(center-vec3_t(0,0,zlen*0.5),{-xlen,0,0},{0,ylen,0},ptr);//back
         sides[3]=xrect_t(center+vec3_t(0,0,zlen*0.5),{xlen,0,0},{0,ylen,0},ptr);//front
         sides[4]=xrect_t(center-vec3_t(xlen*0.5,0,0),{0,-ylen,0},{0,0,zlen},ptr);//left
