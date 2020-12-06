@@ -58,7 +58,7 @@ public:
     double fuzz;
 
     dielectric_t():dielectric_t(1,{1,1,1}){}
-    dielectric_t(double index_of_refraction,colour_t attenuation,double fuzz=0,bool fresnel_ref=true) : ir(index_of_refraction),attenuation(attenuation),is_fresnel_reflectance(fresnel_ref) {}
+    dielectric_t(double index_of_refraction,colour_t attenuation,double fuzz=0,bool fresnel_ref=true) : ir(index_of_refraction),attenuation(attenuation),is_fresnel_reflectance(fresnel_ref),fuzz(fuzz) {}
     dielectric_t(colour_t attenuation):dielectric_t(1,attenuation){}
     dielectric_t(double index_of_refraction):dielectric_t(index_of_refraction,{1,1,1}){}
 
