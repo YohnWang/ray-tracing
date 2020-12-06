@@ -194,5 +194,11 @@ inline void write_clour(const colour_t &pixel_colour)
     int b=static_cast<int>(clamp(sqrt(pixel_colour.z),0,0.999)*256);
     std::printf("%d %d %d\n",r,g,b);
 }
+#include<iostream>
+std::ostream& operator<<(std::ostream& out,const vec3_t &v)
+{
+    out<<v.x<<","<<v.y<<","<<v.z;
+    return out;
+}
 
 #endif
