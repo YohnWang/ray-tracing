@@ -34,7 +34,7 @@ public:
         rec.p=r.at(t);
         rec.t=t;
         rec.mat_ptr=mat_ptr;
-        rec.set_face_normal(r,n);
+        rec.set_face_normal(r,n.unit());
         auto v=rec.p-center;
         rec.u=dot(v,width.unit());
         rec.v=dot(v,height.unit());
